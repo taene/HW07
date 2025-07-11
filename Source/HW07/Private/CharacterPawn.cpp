@@ -65,7 +65,7 @@ void ACharacterPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	{
 		check(MoveAction);
 		check(LookAction);
-		
+
 		EnhancedInput->BindAction(
 			MoveAction,
 			ETriggerEvent::Triggered,
@@ -82,6 +82,16 @@ void ACharacterPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 void ACharacterPawn::Move(const FInputActionValue& Value)
 {
+	const FVector2D MoveInput = Value.Get<FVector2D>();
+	const float DeltaTime = GetWorld()->GetDeltaSeconds();
+
+	check(Controller);
+
+	const FVector ForwardDir = GetActorForwardVector();
+	AddActorLocalOffset(ForwardDir * MoveInput.X * MoveSpeed * DeltaTime, true);
+
+	const FVector RightDir = GetActorRightVector();
+	AddActorLocalOffset(RightDir * MoveInput.Y * MoveSpeed * DeltaTime, true);
 }
 
 void ACharacterPawn::Look(const FInputActionValue& Value)
