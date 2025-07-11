@@ -27,7 +27,7 @@ ACharacterPawn::ACharacterPawn()
 	SpringArmComp->SetupAttachment(RootComponent);
 
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
-	CameraComp->SetupAttachment(SpringArmComp);
+	CameraComp->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);
 }
 
 // Called when the game starts or when spawned
@@ -85,8 +85,6 @@ void ACharacterPawn::Move(const FInputActionValue& Value)
 	const FVector2D MoveInput = Value.Get<FVector2D>();
 	const float DeltaTime = GetWorld()->GetDeltaSeconds();
 
-	check(Controller);
-
 	const FVector ForwardDir = GetActorForwardVector();
 	AddActorLocalOffset(ForwardDir * MoveInput.X * MoveSpeed * DeltaTime, true);
 
@@ -96,4 +94,16 @@ void ACharacterPawn::Move(const FInputActionValue& Value)
 
 void ACharacterPawn::Look(const FInputActionValue& Value)
 {
+	const FVector2D LookInput = Value.Get<FVector2D>();
+	const float DeltaTime = GetWorld()->GetDeltaSeconds();
+
+	AddActorLocalRotation(FRotator(0.0f, LookInput.X * RotationSpeed * DeltaTime, 0.0f));
+	SpringArmComp->AddLocalRotation(FRotator(-LookInput.Y * RotationSpeed * DeltaTime, 0.0f, 0.0f));
+
+	FRotator ClampedRotation = SpringArmComp->GetRelativeRotation();
+	ClampedRotation.Pitch = FMath::Clamp(ClampedRotation.Pitch, -80.0f, 80.0f);
+	ClampedRotation.Yaw = 0;
+	ClampedRotation.Roll = 0;
+
+	SpringArmComp->SetRelativeRotation(ClampedRotation);
 }
