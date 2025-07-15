@@ -85,11 +85,8 @@ void ACharacterPawn::Move(const FInputActionValue& Value)
 	const FVector2D MoveInput = Value.Get<FVector2D>();
 	const float DeltaTime = GetWorld()->GetDeltaSeconds();
 
-	const FVector ForwardDir = GetActorForwardVector();
-	AddActorLocalOffset(ForwardDir * MoveInput.X * MoveSpeed * DeltaTime, true);
-
-	const FVector RightDir = GetActorRightVector();
-	AddActorLocalOffset(RightDir * MoveInput.Y * MoveSpeed * DeltaTime, true);
+	AddActorLocalOffset(GetActorForwardVector() * MoveInput.X * MoveSpeed * DeltaTime, true);
+	AddActorLocalOffset(GetActorRightVector() * MoveInput.Y * MoveSpeed * DeltaTime, true);
 }
 
 void ACharacterPawn::Look(const FInputActionValue& Value)
@@ -97,13 +94,13 @@ void ACharacterPawn::Look(const FInputActionValue& Value)
 	const FVector2D LookInput = Value.Get<FVector2D>();
 	const float DeltaTime = GetWorld()->GetDeltaSeconds();
 
-	AddActorLocalRotation(FRotator(0.0f, LookInput.X * RotationSpeed * DeltaTime, 0.0f));
-	SpringArmComp->AddLocalRotation(FRotator(-LookInput.Y * RotationSpeed * DeltaTime, 0.0f, 0.0f));
-
 	FRotator ClampedRotation = SpringArmComp->GetRelativeRotation();
 	ClampedRotation.Pitch = FMath::Clamp(ClampedRotation.Pitch, -80.0f, 80.0f);
 	ClampedRotation.Yaw = 0;
 	ClampedRotation.Roll = 0;
 
 	SpringArmComp->SetRelativeRotation(ClampedRotation);
+
+	AddActorLocalRotation(FRotator(0.0f, LookInput.X * RotationSpeed * DeltaTime, 0.0f));
+	SpringArmComp->AddLocalRotation(FRotator(-LookInput.Y * RotationSpeed * DeltaTime, 0.0f, 0.0f));
 }
